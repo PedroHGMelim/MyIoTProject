@@ -1,32 +1,91 @@
-var mqtt = require('mqtt')
+import React, { useState, useEffect, useRef } from 'react';
+import { MQTT_HOST, MQTT_PORT, MQTT_PATH, MQTT_USER, MQTT_PASS } from '@env';
+import { StyleSheet, View, Text } from 'react-native';
+import MQTTService from './src/services/mqttService';
+import StatusModal from './src/components/StatusModal';
+import LightControl from './src/components/LightControl';
+import Gauges from './src/components/Gauges';
 
-var options = {
-    host: 'b5c0a8076e584a1f8752f84df3478b74.s1.eu.hivemq.cloud',
-    port: 8884,
-    protocol: 'mqtts',
-    username: 'aluno_etec',
-    password: 'Senha123'
+export default function App() {
+    const [isConnected, setIsConnected] = useState(false);
+    const [showError, setShowError] = useState(false);
+    const [isLightOn, setIsLightOn] = useState(false);
+    const [temp, setTemp] = useState(0);
+    const [hum, setHum] = useState(0);
+    const mqttRef = useRef(new MQTTService());
+
+    const mqttConfig = {
+        host: MQTT_HOST,
+        port: parseInt(MQTT_PORT),
+        path: MQTT_PATH,
+        user: MQTT_USER,
+        pass: MQTT_PASS,
+        clientId: 'RN_App_' + Math.random()
+    };
+
+    console.log('Config MQTT:', MQTT_HOST, MQTT_PORT, MQTT_PATH);
+
+    useEffect(() => {
+        startConnection();
+    }, []);
+
+    const startConnection = () => {
+        setShowError(false);
+        mqttRef.current.connect(
+            mqttConfig,
+            (topic, message) => {
+                if (topic === 'casa/temp') setTemp(parseFloat(message));
+                if (topic === 'casa/umid') setHum(parseFloat(message));
+                if (topic === 'casa/luz') setIsLightOn(message === "1");
+            },
+            () => {
+                setIsConnected(true);
+                mqttRef.current.subscribe('casa/temp');
+                mqttRef.current.subscribe('casa/umid');
+                mqttRef.current.subscribe('casa/luz');
+            },
+            (err) => {
+                console.log('MQTT erro:', err);
+                setIsConnected(false);
+                setShowError(true);
+            }
+        );
+    };
+
+    const toggleLight = () => {
+        const newState = isLightOn ? "0" : "1";
+        mqttRef.current.publish('casa/luz', newState);
+    };
+
+    return (
+        <View style={styles.container}>
+            <Text style={styles.header}>Smart Home IoT</Text>
+
+            <LightControl isLightOn={isLightOn} onToggle={toggleLight} />
+
+            <Gauges temp={temp} hum={hum} />
+
+            <StatusModal
+                visible={showError}
+                onRetry={startConnection}
+                onLater={() => setShowError(false)}
+            />
+        </View>
+    );
 }
 
-// initialize the MQTT client
-var client = mqtt.connect(options);
-
-// setup the callbacks
-client.on('connect', function () {
-    console.log('Connected');
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#121212',
+        padding: 20,
+        alignItems: 'center'
+    },
+    header: {
+        color: '#FFF',
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginTop: 40,
+        marginBottom: 20
+    },
 });
-
-client.on('error', function (error) {
-    console.log(error);
-});
-
-client.on('message', function (topic, message) {
-    // called each time a message is received
-    console.log('Received message:', topic, message.toString());
-});
-
-// subscribe to topic 'my/test/topic'
-client.subscribe('my/test/topic');
-
-// publish message 'Hello' to topic 'my/test/topic'
-client.publish('my/test/topic', 'Hello');
