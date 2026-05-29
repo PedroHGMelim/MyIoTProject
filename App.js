@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MQTT_HOST, MQTT_PORT, MQTT_PATH, MQTT_USER, MQTT_PASS } from '@env';
 import { StyleSheet, View, Text } from 'react-native';
 import MQTTService from './src/services/mqttService';
-import StatusModal from './src/components/StatusModal';
-import LightControl from './src/components/LightControl';
 import Gauges from './src/components/Gauges';
+import LightControl from './src/components/LightControl';
+import StatusModal from './src/components/StatusModal';
 
 export default function App() {
     const [isConnected, setIsConnected] = useState(false);
@@ -12,6 +12,7 @@ export default function App() {
     const [isLightOn, setIsLightOn] = useState(false);
     const [temp, setTemp] = useState(0);
     const [hum, setHum] = useState(0);
+
     const mqttRef = useRef(new MQTTService());
 
     const mqttConfig = {
