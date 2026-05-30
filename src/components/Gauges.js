@@ -12,14 +12,12 @@ function GaugeCircle({ value, max = 100, color, title, unit }) {
     return (
         <View style={styles.gaugeBox}>
             <Svg width={130} height={130} viewBox="0 0 130 130">
-                {/* Trilha cinza */}
                 <Circle
                     cx="65" cy="65" r={radius}
                     stroke="#2C3E50"
                     strokeWidth={stroke}
                     fill="none"
                 />
-                {/* Progresso colorido */}
                 <Circle
                     cx="65" cy="65" r={radius}
                     stroke={color}
@@ -31,7 +29,6 @@ function GaugeCircle({ value, max = 100, color, title, unit }) {
                     origin="65, 65"
                 />
             </Svg>
-            {/* Valor no centro */}
             <View style={styles.valueBox}>
                 <Text style={[styles.value, { color }]}>
                     {typeof value === 'number' ? value.toFixed(1) : value}
