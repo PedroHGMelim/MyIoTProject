@@ -8,6 +8,11 @@ module.exports = function (api) {
         path: '.env',
         safe: false,
         allowUndefined: true,
+      }],
+      ['module-resolver', {
+        alias: {
+          'stream': 'readable-stream',
+        }
       }]
     ]
   };
