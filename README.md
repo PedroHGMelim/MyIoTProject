@@ -9,3 +9,6 @@ MQTT_USER=seu_usuario
 MQTT_PASS=sua_senha
 
 MQTT_PATH=/mqtt
+
+Vídeo demonstrando o aplicativo e explicando algumas funções:
+https://youtu.be/rpjg6EFsnpw
